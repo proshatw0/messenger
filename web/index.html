@@ -3,9 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Messenger</title>
+    <link rel="stylesheet" href="src/css/style.css">
+    <script src = "eel.js"></script>
 </head>
 <body>
+    <div class="stroke">
+        <button class="Login_mode active" id="Login_mode" onclick="activateButtonLogin(this)">Login</button>
+        <div class="line"></div>
+        <button class="Registration_mode" id="Registration_mode" onclick="activateButtonRegistration(this)">Registration</button>
 
+        <div class="moveable-elements-Login">
+            <input type="text" class="username" id="username" name="username" value="Username" onfocus="clearUsernameField()" onblur="preserveUsernameField()">
+            <input type="text" class="password" id="password" name="password" value="Password" onfocus="clearPasswordField()" onblur="preservePasswordField()">
+            <button class="Login" id="Login">Login</button>
+        </div>
+        <div class="moveable-elements-Registration">
+        </div>
+        <script src="src/js/script.js"></script>
+
+
+    </div>
 </body>
 </html>
