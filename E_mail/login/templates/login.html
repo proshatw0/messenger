@@ -1,0 +1,104 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        @font-face {
+            font-family: 'Itim';
+            src: url("{% static 'font/Itim-Regular.ttf' %}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'login/css/style.css' %}">
+</head>
+<body>
+    <div class="stroke" id="stroke">
+        <button class="Login_mode active" id="Login_mode" onclick="activateButtonLogin(this)">Login</button>
+        <div class="line"></div>
+        <button class="Registration_mode" id="Registration_mode" onclick="activateButtonRegistration(this)">Registration</button>
+
+        <div class="moveable-elements-Login">
+            <form method="post" action="{% url 'login:login' %}" id="loginForm">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="hidden" name="mode" value="login">
+                <input type="text" class="email" id="email" name="email" placeholder="Email" value="{{ email }}">
+                <input type="password" class="password" id="password" name="password" placeholder="Password">
+                <button class="Login" id="Login">Login</button>
+            </form>
+
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script>
+            $(document).ready(function() {
+                $('#loginForm').submit(function(e) {
+                    e.preventDefault(); 
+                
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'login:login' %}",
+                        data: $(this).serialize(),
+                        dataType: 'json',
+                        beforeSend: function(xhr, settings) {
+                                xhr.setRequestHeader("X-CSRFToken", $('[name=csrfmiddlewaretoken]').val());
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                window.location.href = response.next_url;
+                            } else {
+                                $('#error').text(response.error);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                });
+            });
+            </script>
+        </div>
+        <div class="moveable-elements-Registration">
+            <form method="post" action="{% url 'login:login' %}" id="registrationForm">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="hidden" name="mode" value="register">
+            </form>
+            <script>
+                $(document).ready(function() {
+                    $('#registrationForm').submit(function(e) {
+                        e.preventDefault(); 
+                    
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'login:login' %}",
+                            data: $(this).serialize(),
+                            dataType: 'json',
+                            beforeSend: function(xhr, settings) {
+                                xhr.setRequestHeader("X-CSRFToken", $('[name=csrfmiddlewaretoken]').val());
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                window.location.href = response.next_url;
+                            } else {
+                                $('#error').text(response.error);
+                            }
+                            },
+                            error: function(xhr, status, error) {
+                                console.log(error);
+                            }
+                        });
+                    });
+                });
+                </script>
+        </div>
+        <p id="error", class="error">{{ error }}</p>
+        <script src="{% static 'login/js/script.js' %}"></script>
+    </div>
+</body>
+</html>

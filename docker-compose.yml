@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Email
+    environment:
+      - DJANGO_SETTINGS_MODULE=Email.settings.dev

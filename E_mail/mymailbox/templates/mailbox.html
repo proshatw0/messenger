@@ -1,0 +1,181 @@
+{% load static %}
+{% load tz %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        @font-face {
+            font-family: 'Itim';
+            src: url("{% static 'font/Itim-Regular.ttf' %}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'mymailbox/css/style.css' %}">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <header>
+        <h1>itworks</h1>
+        <p class="you_email" id="you_email">{{ you_email }}</p>
+        <button class="you_icon_button" id="you icon_button">
+            <img src="{{ MEDIA_URL }}{{ you_icon_url }}" alt="you" class="you_icon" id="you_icon">
+        </button>
+    </header>
+    <div class="main_objects", id="main_objects">
+        <div class="sidebar" id="sidebar">
+            <button class="new_message" id="new_message">New message</button>
+            <ul class="filters" id="filters">
+                <li>
+                    <a class="{% if Incoming %}selected_filter{% else %}apply_filter{% endif %}" id="apply_filter" href="/mailbox/{{ you_email }}" data-state="inactive">
+                        <img class="filter_img" src="{% static 'mymailbox/images/inbox.png' %}" alt="">
+                        <p>Incoming</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="{% if Outgoing %}selected_filter{% else %}apply_filter{% endif %}" id="apply_filter" href="/mailbox/{{ you_email }}/sent">
+                        <img class="filter_img" src="{% static 'mymailbox/images/outgoing.png' %}" alt="">
+                        <p class="filter_text">Outgoing</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="{% if Favorites %}selected_filter{% else %}apply_filter{% endif %}" id="apply_filter" href="/mailbox/{{ you_email }}/favorites">
+                        <img class="filter_img" src="{% static 'mymailbox/images/favorites.png' %}" alt="">
+                        <p class="filter_text">Favorites</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="{% if Unread %}selected_filter{% else %}apply_filter{% endif %}" id="apply_filter" href="/mailbox/{{ you_email }}/unread">
+                        <img class="filter_img" src="{% static 'mymailbox/images/unread.png' %}" alt="">
+                        <p class="filter_text">Unread</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="{% if Trashcan %}selected_filter{% else %}apply_filter{% endif %}" id="apply_filter" href="/mailbox/{{ you_email }}/trash">
+                        <img class="filter_img" src="{% static 'mymailbox/images/trashcan.png' %}" alt="">
+                        <p class="filter_text">Trashcan</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="message_place" id="message_place">
+            <div class="main_message-top" id="main_message-top">
+                <button class="trash_all" id="trash_message" onclick="trash_message_main()">
+                    <img class="trash_img" src="{% static 'mymailbox/images/trashcan.png' %}" alt="">
+                    <p class="trash_text">Delete</p>
+                </button>
+
+                <button class="read_all" id="favorites_message" onclick="to_favorites_message_main()">
+                    <img class="read_img" src="{% static 'mymailbox/images/favorites.png' %}" alt="">
+                    <p class="read_text">To favorites</p>
+                </button>
+            </div>
+            <div class="message_main" id="message_main">
+                <p class="title_main" id="title_main"></p>
+                <div class="message-header" id="message-header">
+                    <img class="message_icon" id="message_icon" alt="">
+                    <p class="email_main" id="email_senders_main"></p>
+                    <p class="to-whom" id="to-whom">To whom:</p>
+                    <p class="email_main" id="email_recipient_main"></p>
+                    <p class="data_main" id="data_main"></p>
+                </div>
+                <div class="message-scroll" id="message-scroll">
+                    <p class="text_main" id="text_main"></p>
+                </div>
+                <a class="downloud_file" id="downloud_file"  href="" onclick="sendAjaxRequestForFile(event)">
+                    <input type="text" id="message-main-id" style="display:none;">
+                    <span title="" class="span_download_file" id="span_download_file"></span>
+                </a>
+            </div>
+
+        </div>
+        <div class="mailbox" id="mailbox">
+            <div class="top-bar" id="top-bar">
+                <button class="read_all" id="read_all" onclick="read_all()">
+                    <img class="read_img" src="{% static 'mymailbox/images/read_all.png' %}" alt="">
+                    <p class="read_text" id="read_text">Read everything</p>
+                </button>
+                <button class="trash_all" id="trash_all" onclick="trash_all()">
+                    <img class="trash_img" src="{% static 'mymailbox/images/trashcan.png' %}" alt="">
+                    <p class="trash_text" id="trash_text">Delete everything</p>
+                </button>
+            </div>
+            <div class="chat" id="chat">
+                {% if messages %}
+                    {% for message in messages %}
+                    <a class="message message-flex" id="{{ message.url }}" href="" onclick="sendAjaxRequest(event, '{{ message.url }}')">
+                            {% if message.read %}
+                                <div class="read read-flex"></div>
+                            {% else %}
+                                <div class="unread unread-flex"></div>
+                            {% endif %}
+                            <div class="message-container message-container-flex" id="message-container">
+                                <img src="{{ MEDIA_URL }}{{ message.icon_url }}" alt="" class="icon_message" id="iconMessage">
+                                <input type="checkbox" class="checkbox" id="checkbox" {% if message.checked %}checked{% endif %}>
+                            </div>
+                            <span title="{{ message.email }}" class="email_senders email_senders-flex">
+                                {{ message.email }}
+                            </span>
+                            <p class="title_message title_message-flex">{{ message.title }}</p>
+                            <p class="value_message value_message-flex">{{ message.value }}</p>
+                            {% timezone user_timezone %}
+                            <p class="data_message data_message-flex">
+                                {{ message.sent_at|date:"Y.m.d H:i" }}
+                            </p>
+                            {% endtimezone %}
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="clear_mailbox" id="clear_mailbox">Your mailbox is still empty</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="you-sure" id="you-sure">
+        <div class="sure-content">
+            <h1 class="text-sure">Are You sure?</h1>
+            <button class="sure-button no" onclick="no_accept()">
+                No
+            </button>
+            <button class="sure-button" onclick="accept()">
+                Yes
+            </button>
+        </div>
+    </div>
+
+
+    <div id="new_message_form" class="new_message_form">
+        <div class="new_message_content">
+            <div class="new_message_header">
+                <span class="close">&times;</span>
+                <p class="new_message_title_text">New message</p>
+            </div>
+            <form method="post" action="{% url 'mailbox:new_message' %}" id="new_messageForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="text" class="new_form" id="recipient" name="recipient" placeholder="Recipient">
+                <input type="text" class="new_form" id="new_message_title" name="title" placeholder="Title">
+                <div class="textarea_area">
+                    <textarea id="new_message_text" name="text" placeholder="Main part" autofocus></textarea>
+                </div>
+                <input type="file" name="file" id="file" style="display:none;">
+                <button class="new_form" id="select_file" onclick="document.getElementById('file').click(); return false;">
+                    <span title="Select file for send" class="span_select_file">
+                        Select file
+                    </span>
+                </button>
+                <button class="Send_message" id="Send_message">Send</button>
+                <p class="error_new_message", id="error_new_message"></p>
+            </form>
+        </div>
+    </div>
+    <script src="{% static 'mymailbox/js/script.js' %}"></script>
+</body>
+</html>
